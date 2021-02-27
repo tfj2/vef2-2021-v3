@@ -1,8 +1,10 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import xss from 'xss';
+import pg from 'pg';
 
 import { list, insert } from './db.js';
+import { create } from './createdb.js';
 
 export const router = express.Router();
 
@@ -106,7 +108,38 @@ async function register(req, res) {
   return res.render('error', { title: 'Gat ekki skráð!', text: 'Hafðir þú skrifað undir áður?' });
 }
 
+const connectionString = process.env.DATABASE_URL;
+
+const pool = new pg.Pool({ connectionString });
+
+async function query(q) {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(q);
+    const { rows } = result;
+    return rows;
+  } catch (err) {
+    console.error('Error running query');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+const q = 'SELECT COUNT(*) AS count FROM signatures;';
+let result = await query(q);
+let nr = result[0].count;
+let nrp = Math.ceil(nr/50);
+console.log(nrp);
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
+
+
 router.get('/', catchErrors(index));
+
 
 router.post(
   '/',

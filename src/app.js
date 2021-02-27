@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
 import { format } from 'date-fns';
+import pg from 'pg';
 
 import { router as registrationRouter } from './registration.js';
 

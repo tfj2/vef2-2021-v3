@@ -6,3 +6,4 @@ CREATE TABLE IF NOT EXISTS signatures(
   anonymous boolean not null default true,
   signed timestamp with time zone not null default current_timestamp
 );
+
